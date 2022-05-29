@@ -28,6 +28,6 @@ jobs:
         name: assimp-release
         path: |
           ${{ github.workspace }}\include
-          ${{ github.workspace }}\build\lib\assimp-vc143-mt.lib
-          ${{ github.workspace }}\build\lib\assimp-vc143-mt.pdb
-          ${{ github.workspace }}\build\contrib\zlib\zlibstatic.lib
+          ${{ github.workspace }}\build\lib\Release\assimp-vc143-mt.lib
+          ${{ github.workspace }}\build\lib\Release\assimp-vc143-mt.pdb
+          ${{ github.workspace }}\build\contrib\zlib\Release\zlibstatic.lib
