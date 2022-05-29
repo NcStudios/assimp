@@ -26,7 +26,7 @@ jobs:
       run: cmake -G "Visual Studio 17 2022" -S SOURCE_DIR -B BUILD_DIR -DCMAKE_INSTALL_PREFIX=INSTALL_DIR CMAKE_OPTIONS
 
     - name: Build and Install
-      run: cmake --build BUILD_DIR --target install --config Release
+      run: cmake --build BUILD_DIR --target install --config Release --parallel 2
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
