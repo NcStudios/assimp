@@ -17,13 +17,17 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure
-      run: cmake -G "Visual Studio 17 2022" -S ${{ github.workspace }} -B ${{ github.workspace }}/build -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_ZLIB=ON -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF
+      run: cmake -G "Visual Studio 17 2022" -S ${{ github.workspace }} -B ${{ github.workspace }}/build -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_ZLIB=ON -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF
 
     - name: Build and Install
-      run: cmake --build ${{ github.workspace }}/build --target install --config Release
+      run: cmake --build ${{ github.workspace }}/build --config Release
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: assimp-release
-        path: ${{ github.workspace }}/install/*
+        path: |
+          ${{ github.workspace }}\include
+          ${{ github.workspace }}\build\lib\assimp-vc143-mt.lib
+          ${{ github.workspace }}\build\lib\assimp-vc143-mt.pdb
+          ${{ github.workspace }}\build\contrib\zlib\zlibstatic.lib
