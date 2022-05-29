@@ -6,9 +6,6 @@ on:
     branches: [ master ]
 
 env:
-  SOURCE_DIR: ${{github.workspace}}
-  BUILD_DIR: ${{github.workspace}}/build
-  INSTALL_DIR: ${{github.workspace}}/install
   CMAKE_OPTIONS: -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_ZLIB=ON -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF
 
 jobs:
@@ -23,13 +20,13 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure
-      run: cmake -G "Visual Studio 17 2022" -S SOURCE_DIR -B BUILD_DIR -DCMAKE_INSTALL_PREFIX=INSTALL_DIR CMAKE_OPTIONS
+      run: cmake -G "Visual Studio 17 2022" -S ${{ github.workspace }} -B ${{ github.workspace }}/build -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install ${{ env.CMAKE_OPTIONS }}
 
     - name: Build and Install
-      run: cmake --build BUILD_DIR --target install --config Release --parallel 2
+      run: cmake --build ${{ github.workspace }}/build --target install --config Release --parallel 2
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: assimp-release
-        path: INSTALL_DIR/*
+        path: ${{ github.workspace }}/install/*
