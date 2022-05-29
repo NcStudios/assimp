@@ -5,9 +5,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-  CMAKE_OPTIONS: -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_ZLIB=ON -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF
-
 jobs:
   Windows:
     runs-on: windows-2022
@@ -20,7 +17,7 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure
-      run: cmake -G "Visual Studio 17 2022" -S ${{ github.workspace }} -B ${{ github.workspace }}/build -DCMAKE_INSTALL_PREFIX=install ${{ env.CMAKE_OPTIONS }}
+      run: cmake -G "Visual Studio 17 2022" -S ${{ github.workspace }} -B ${{ github.workspace }}/build -DCMAKE_INSTALL_PREFIX=install -DBUILD_SHARED_LIBS=OFF -DASSIMP_BUILD_ZLIB=ON -DASSIMP_BUILD_ASSIMP_TOOLS=OFF -DASSIMP_BUILD_TESTS=OFF
 
     - name: Build and Install
       run: cmake --build ${{ github.workspace }}/build --target install --config Release
