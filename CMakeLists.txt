@@ -168,7 +168,6 @@ IF (WIN32)
           $<$<CONFIG:Debug>:/MTd>
           $<$<CONFIG:Release>:/MT>
       )
-
     endif()
   ENDIF()
 ENDIF()
@@ -265,7 +264,6 @@ ENDIF()
 
 # Grouped compiler settings ########################################
 IF ((CMAKE_C_COMPILER_ID MATCHES "GNU") AND NOT MINGW)
-
   IF(NOT ASSIMP_HUNTER_ENABLED)
     SET(CMAKE_CXX_STANDARD 17)
     SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
