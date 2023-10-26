@@ -194,6 +194,8 @@ SET( Common_SRCS
   Common/ScenePreprocessor.cpp
   Common/ScenePreprocessor.h
   Common/SkeletonMeshBuilder.cpp
+  Common/StackAllocator.h
+  Common/StackAllocator.inl
   Common/StandardShapes.cpp
   Common/TargetAnimation.cpp
   Common/TargetAnimation.h
@@ -925,22 +927,22 @@ ELSE()
 ENDIF()
 
 # polyclipping
-IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(polyclipping)
-  find_package(polyclipping CONFIG REQUIRED)
-ELSE()
+#IF(ASSIMP_HUNTER_ENABLED)
+#  hunter_add_package(polyclipping)
+#  find_package(polyclipping CONFIG REQUIRED)
+#ELSE()
   SET( Clipper_SRCS
     ../contrib/clipper/clipper.hpp
     ../contrib/clipper/clipper.cpp
   )
   SOURCE_GROUP( Contrib\\Clipper FILES ${Clipper_SRCS})
-ENDIF()
+#ENDIF()
 
 # poly2tri
-IF(ASSIMP_HUNTER_ENABLED)
-  hunter_add_package(poly2tri)
-  find_package(poly2tri CONFIG REQUIRED)
-ELSE()
+#IF(ASSIMP_HUNTER_ENABLED)
+#  hunter_add_package(poly2tri)
+#  find_package(poly2tri CONFIG REQUIRED)
+#ELSE()
   SET( Poly2Tri_SRCS
     ../contrib/poly2tri/poly2tri/common/shapes.cc
     ../contrib/poly2tri/poly2tri/common/shapes.h
@@ -955,7 +957,7 @@ ELSE()
     ../contrib/poly2tri/poly2tri/sweep/sweep_context.h
   )
   SOURCE_GROUP( Contrib\\Poly2Tri FILES ${Poly2Tri_SRCS})
-ENDIF()
+#ENDIF()
 
 # minizip/unzip
 IF(ASSIMP_HUNTER_ENABLED)
@@ -963,7 +965,6 @@ IF(ASSIMP_HUNTER_ENABLED)
   find_package(minizip CONFIG REQUIRED)
 ELSE()
   SET( unzip_SRCS
-    ../contrib/unzip/crypt.c
     ../contrib/unzip/crypt.h
     ../contrib/unzip/ioapi.c
     ../contrib/unzip/ioapi.h
@@ -1198,7 +1199,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
 
     IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang" ) # clang-cl
       TARGET_COMPILE_OPTIONS(assimp PRIVATE -Wall -Werror
-        -Wno-unused-function
         -Wno-microsoft-enum-value
         -Wno-switch-enum
         -Wno-covered-switch-default
@@ -1211,7 +1211,6 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-undef
         -Wno-suggest-destructor-override
         -Wno-suggest-override
-        -Wno-inconsistent-missing-destructor-override
         -Wno-zero-as-null-pointer-constant
         -Wno-global-constructors
         -Wno-exit-time-destructors
@@ -1229,32 +1228,23 @@ IF (ASSIMP_WARNINGS_AS_ERRORS)
         -Wno-double-promotion
         -Wno-unused-macros
         -Wno-disabled-macro-expansion
-        -Wno-shadow-field-in-constructor
         -Wno-shadow-field
         -Wno-shadow
         -Wno-language-extension-token
         -Wno-header-hygiene
         -Wno-tautological-value-range-compare
         -Wno-tautological-type-limit-compare
-        -Wno-missing-noreturn
         -Wno-missing-variable-declarations
         -Wno-extra-semi
         -Wno-nonportable-system-include-path
         -Wno-undefined-reinterpret-cast
         -Wno-shift-sign-overflow
-        -Wno-deprecated-copy-with-user-provided-dtor
-        -Wno-deprecated-copy-with-dtor
         -Wno-deprecated
         -Wno-format-nonliteral
-        -Wno-format-non-iso
         -Wno-comma
-        -Wno-unreachable-code-break
-        -Wno-unreachable-code-return
-        -Wno-unreachable-code
         -Wno-implicit-fallthrough
         -Wno-unused-template
         -Wno-undefined-func-template
-        -Wno-nested-anon-types
         -Wno-declaration-after-statement
       )
     ELSE()
@@ -1277,9 +1267,9 @@ TARGET_INCLUDE_DIRECTORIES ( assimp PUBLIC
 IF(ASSIMP_HUNTER_ENABLED)
   TARGET_LINK_LIBRARIES(assimp
       PUBLIC
-      polyclipping::polyclipping
+      #polyclipping::polyclipping
       openddlparser::openddl_parser
-      poly2tri::poly2tri
+      #poly2tri::poly2tri
       minizip::minizip
       ZLIB::zlib
       RapidJSON::rapidjson
@@ -1398,7 +1388,7 @@ ENDIF()
 
 # Add RT-extension library for glTF importer with Open3DGC-compression.
 IF (RT_FOUND AND ASSIMP_IMPORTER_GLTF_USE_OPEN3DGC)
-  TARGET_LINK_LIBRARIES(assimp ${RT_LIBRARY})
+  TARGET_LINK_LIBRARIES(assimp rt)
 ENDIF ()
 
 
@@ -1428,25 +1418,29 @@ if(MSVC AND ASSIMP_INSTALL_PDB)
       COMPILE_PDB_NAME assimp${LIBRARY_SUFFIX}
       COMPILE_PDB_NAME_DEBUG assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}
     )
-  ENDIF()
 
-  IF(CMAKE_GENERATOR MATCHES "^Visual Studio")
-    install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS Debug
-    )
-    install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS RelWithDebInfo
-    )
+    IF(GENERATOR_IS_MULTI_CONFIG)
+      install(FILES ${Assimp_BINARY_DIR}/code/Debug/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS Debug
+      )
+      install(FILES ${Assimp_BINARY_DIR}/code/RelWithDebInfo/assimp${LIBRARY_SUFFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS RelWithDebInfo
+      )
+    ELSE()
+      install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS Debug
+      )
+      install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
+        DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
+        CONFIGURATIONS RelWithDebInfo
+      )
+    ENDIF()
   ELSE()
-    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}${CMAKE_DEBUG_POSTFIX}.pdb
+    install(FILES $<TARGET_PDB_FILE:assimp>
       DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS Debug
-    )
-    install(FILES ${Assimp_BINARY_DIR}/code/assimp${LIBRARY_SUFFIX}.pdb
-      DESTINATION ${ASSIMP_LIB_INSTALL_DIR}
-      CONFIGURATIONS RelWithDebInfo
     )
   ENDIF()
 ENDIF ()
